@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock Stacks functions
 vi.mock('@stacks/transactions', () => ({
-  makeContractCall: vi.fn(() => ({ txid: 'mock-txid' })),
+  makeContractCall: vi.fn(() => Promise.resolve({ txid: 'mock-txid' })),
   broadcastTransaction: vi.fn(() => Promise.resolve({ txid: 'mock-txid' })),
   callReadOnlyFunction: vi.fn(() => Promise.resolve({
     value: {
@@ -139,7 +139,7 @@ describe('Collective Intelligence Platform', () => {
   });
   
   it('should not allow unauthorized users to close a problem', async () => {
-    vi.mocked(broadcastTransaction).mockRejectedValueOnce(new Error('Unauthorized'));
+    vi.mocked(makeContractCall).mockRejectedValueOnce(new Error('Unauthorized'));
     
     await expect(makeContractCall({
       contractAddress: DEPLOYER_ADDRESS,
@@ -151,7 +151,7 @@ describe('Collective Intelligence Platform', () => {
   });
   
   it('should not allow voting on non-existent solutions', async () => {
-    vi.mocked(broadcastTransaction).mockRejectedValueOnce(new Error('Solution not found'));
+    vi.mocked(makeContractCall).mockRejectedValueOnce(new Error('Solution not found'));
     
     await expect(makeContractCall({
       contractAddress: DEPLOYER_ADDRESS,
